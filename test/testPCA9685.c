@@ -14,11 +14,20 @@ or use an oscilloscope to measure the PWM signal.
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <signal.h>
+
 #include <PCA9685/PCA9685.h>
+
+int fd;
+
+void cleanup() {
+	// Close the file descriptor
+	PCA9685_close(fd);
+}
 
 int main() {
 	// Initialise the PCA9685 IC
-	int fd = PCA9685_init();
+	fd = PCA9685_init();
 	if (PCA9685_errno != 0) {
 		printf("Error initialising PCA9685 IC: %s\n", PCA9685_strerror(PCA9685_errno));
 		return 1;
@@ -35,22 +44,32 @@ int main() {
 		printf("Error setting PWM frequency: %s\n", PCA9685_strerror(PCA9685_errno));
 		return 1;
 	}
+	
+	// Set SIGINT handler
+	signal(SIGINT, cleanup);
 
 	// Sweep the PWM signal from 1000uS to 2000uS
-	for (int i = 1000; i <= 2000; i += 10) {
-		if (!PCA9685_setPWM(fd, 0, 0, i)) {
-			printf("Error setting PWM signal: %s\n", PCA9685_strerror(PCA9685_errno));
-			return 1;
+	while (1) {
+		for (int i = 1000; i <= 2000; i += 10) {
+			if (!PCA9685_setPWMuS(fd, 0, i)) {
+				printf("Error setting PWM signal: %s\n", PCA9685_strerror(PCA9685_errno));
+				return 1;
+			}
+
+			usleep(10000);
 		}
 
-		usleep(10000);
+		for (int i = 2000; i >= 1000; i -= 10) {
+			if (!PCA9685_setPWMuS(fd, 0, i)) {
+				printf("Error setting PWM signal: %s\n", PCA9685_strerror(PCA9685_errno));
+				return 1;
+			}
+
+			usleep(10000);
+		}
 	}
 
-	// Close the file descriptor
-	if (!PCA9685_close(fd)) {
-		printf("Error closing file descriptor: %s\n", PCA9685_strerror(PCA9685_errno));
-		return 1;
-	}
+	cleanup();
 
 	return 0;
 }
