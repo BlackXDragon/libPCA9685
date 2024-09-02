@@ -201,6 +201,8 @@ bool PCA9685_close(int fd) {
 	return true;
 }
 
+int PCA9685_errno;
+
 const char* PCA9685_strerror(int err) {
 	switch (err) {
 		case 0:

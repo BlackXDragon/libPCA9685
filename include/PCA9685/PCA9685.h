@@ -86,7 +86,7 @@ bool f_PCA9685_setPWMuS(setPWMuS_args args);
 bool PCA9685_close(int fd);
 
 // Error code variable
-int PCA9685_errno;
+extern int PCA9685_errno;
 
 // String representation of the error code
 const char* PCA9685_strerror(int err);
