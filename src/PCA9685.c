@@ -1,4 +1,4 @@
-#include <PCA9685/PCA9685.h>
+#include "PCA9685/PCA9685.h"
 
 int f_PCA9685_init(init_args args) {
 	char* i2c_device = args.i2c_device? args.i2c_device : "/dev/i2c-1";
@@ -200,8 +200,6 @@ bool PCA9685_close(int fd) {
 
 	return true;
 }
-
-int PCA9685_errno;
 
 const char* PCA9685_strerror(int err) {
 	switch (err) {
